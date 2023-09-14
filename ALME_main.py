@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import qutip
 import tenpy
-import matplotlib.pyplot as plt
 from lindblad import *
 from ALME import *
 
@@ -13,12 +12,12 @@ from ALME import *
 t, Dt = 0, 0.001      # Starting time and time step
 
 save_time_N = False
-Umel = False
-Standard = False
+Umel = True
+Standard = True
 
 # Initialize lists and dictionaries
-N_list = [6]#[2,3,4,5,6,7]
-iterations_list = [3000]
+N_list = [2,3,4,5,6,7]
+iterations_list = [5000]
 
 t_ent_Kraus = []
 t_ent_Umel = []
@@ -181,30 +180,6 @@ if save_time_N == True:
     df_time_N.to_excel(writer_times_N, 'DataFrame')
     writer_times_N.close()
     print(f'TIME N FILE CORRECTLY SAVED')
-        
 
-# t_stand = dict_time_N['elaps_stand']
-# t_approx_Kraus = dict_time_N['elaps_approx_Kraus']
-# t_approx_Umel = dict_time_N['elaps_approx_Umel']
-# iters_N = dict_time_N['N']
-# plt.plot(iters_N, t_stand, label = 'Standard')
-# plt.plot(iters_N, t_approx_Kraus, label = 'Approx Kraus')
-# plt.plot(iters_N, t_approx_Umel, label = 'Approx Umel')
-# # plt.ylabel('t')
-# plt.title('Elapsed time w.r.t the dimension of the system', fontsize=25)
-# plt.xlabel('N', fontsize=18)
-# plt.legend(fontsize = 18)
-# plt.show()
-
-# Plot the histogram of results
-plt.title(r'$\bf{P}$$_{ent}(x)$, 'fr'N = {N}, {iterations} iterations', fontsize=35)
-plt.hist(dict_data['t_approx_Kraus'], bins = 'auto', histtype='step', fill = False, density = True, label = 'Kraus')
-if Standard == True:
-    plt.hist(dict_data['t_standard'], bins = 'auto', histtype='step', fill = False, density = True, label = 'Standard')
-if Umel == True:
-    plt.hist(dict_data['t_approx_Umel'], bins = 'auto', histtype='step', fill = False, density = True, label = 'Umel')
-plt.xlabel(fr'$x$', fontsize = 30)
-plt.legend()
-plt.show()
 
 
