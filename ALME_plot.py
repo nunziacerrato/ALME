@@ -12,10 +12,11 @@ N = 2
 Dt = 0.01
 iterations = 5000
 prec_t = 3
-dir = os.getcwd()
+path = os.getcwd()
+dir = os.path.abspath(os.path.join(path, os.pardir))
 
 # Plot of the histograms obtained with the two approximated schemes and the standard method
-if True:
+if False:
     df_fromexcel_Kraus = pd.read_excel(f'{dir}\\UMEL_data\\' \
                                        f't_ent_N_{N}_{iterations}_iterations_Dt={Dt}_II.xlsx')
 
@@ -76,7 +77,7 @@ if True:
 if True:
     iterations = 5
     Dt = 0.01
-    df_fromexcel_Kraus_time = pd.read_excel(f'{dir}\\UMEL_data\\'
+    df_fromexcel_Kraus_time = pd.read_excel(f'{dir}\\UMEL\\UMEL_data\\'
                                             f'times_for_N_t_ent_iters={iterations}_Dt={Dt}_II.xlsx')
     
     iters_N = df_fromexcel_Kraus_time['N']
@@ -85,14 +86,14 @@ if True:
     t_approx_Umel = df_fromexcel_Kraus_time['elaps_approx_Umel']
 
     fig_time, ax_time = plt.subplots(figsize=(15,10))
-    ax_time.set_title(f'Elapsed time vs dimension', fontsize=25)
+    ax_time.set_title(f'Elapsed Computational Time [s] vs Dimension', fontsize=25)
     ax_time.plot(iters_N, t_stand, label = 'Standard')
     ax_time.plot(iters_N, t_approx_Kraus, label = 'Approx Kraus')
     ax_time.plot(iters_N, t_approx_Umel, label = 'Approx Umel')
     ax_time.set_xlabel('N', fontsize=20)
     ax_time.legend(fontsize = 18)
     ax_time.tick_params(labelsize=20)
-    fig_time.savefig(f'{dir}\\UMEL_plot\\NEW_elapsed_time_{iterations}_iterations_Dt={Dt}.png', \
+    fig_time.savefig(f'{dir}\\UMEL\\UMEL_plot\\NEW_elapsed_time_{iterations}_iterations_Dt={Dt}.png', \
                     bbox_inches='tight')
     plt.show()
     
