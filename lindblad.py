@@ -375,7 +375,7 @@ def negat_ent(N,Lind_matr,t):
         out : float
                 The negativity of entanglement.
     '''
-    choi_trans_eigval = np.linalg.eigvals(choi_transp(N,Lind_matr,t))
+    choi_trans_eigval = np.linalg.eigvalsh(choi_transp(N,Lind_matr,t))
     neg_ent=0
     for i in range(N**2):
         neg_ent = neg_ent + np.absolute(choi_trans_eigval[i]) - choi_trans_eigval[i]

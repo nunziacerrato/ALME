@@ -155,7 +155,7 @@ def neg_ent(state,N):
     '''
     state_qutip = qutip.Qobj(state, dims = [[N,N],[N,N]], shape = (N**2,N**2))
     state_transpose_B = np.array(qutip.partial_transpose(state_qutip, [0,1]))
-    state_trans_eigval = np.linalg.eigvals(state_transpose_B)
+    state_trans_eigval = np.linalg.eigvalsh(state_transpose_B)
     neg = 0
     for i in range(N**2):
         neg = neg + np.absolute(state_trans_eigval[i]) - state_trans_eigval[i]

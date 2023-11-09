@@ -7,33 +7,38 @@ import tenpy
 from lindblad import *
 from ALME import *
 
-
+t_tot_in = time.time()
 # Define time parameters
 t, Dt = 0, 0.001      # Starting time and time step
 
 save_time_N = False
-Umel = True
-Standard = True
+Umel = False
+Standard = False
 
 # Initialize lists and dictionaries
-N_list = [2,3,4,5,6,7]
-iterations_list = [5000]
+N_list = [9] 
+# N_list = [8,9,10]
+iterations_list = [10]#[3000]
 
-t_ent_Kraus = []
-t_ent_Umel = []
-t_ent_standard = []
+# t_ent_Kraus = []
+# t_ent_Umel = []
+# t_ent_standard = []
 
-dict_data = {'t_approx_Kraus' : [], 't_approx_Umel' : [], 't_standard' : []}
-dict_time = {'iters' : [], 'elaps_approx_Kraus' : [], 'elaps_approx_Umel' : [], 'elaps_stand' : []}
+# dict_data = {'t_approx_Kraus' : [], 't_approx_Umel' : [], 't_standard' : []}
+# dict_time = {'iters' : [], 'elaps_approx_Kraus' : [], 'elaps_approx_Umel' : [], 'elaps_stand' : []}
 dict_time_N = {'N' : [], 'elaps_approx_Kraus' : [], 'elaps_approx_Umel' : [], 'elaps_stand' : []}
 
 # Cycle on the dimensions and the iteration number
 for N in N_list:
     print(N)
+    dict_data = {'t_approx_Kraus' : [], 't_approx_Umel' : [], 't_standard' : []}
+    # dict_time = {'iters' : [], 'elaps_approx_Kraus' : [], 'elaps_approx_Umel' : [], 'elaps_stand' : []}
+    
+
     dict_time_N['N'].append(N)
 
     for iterations in iterations_list:
-        dict_time['iters'].append(iterations)
+        # dict_time['iters'].append(iterations)
         
         elapsed_time_approx_Kraus = 0
         elapsed_time_approx_Umel = 0
@@ -62,7 +67,7 @@ for N in N_list:
 
             # Cycle until the condition on the negativity is satisfied
             t_in_approx_Kraus = time.time()
-            while (neg > 1e-12):
+            while (neg >= 1e-13):
 
                 # Compute the state after the interaction with the environment and its negativity
                 state = MP_IIord(ham_kron,L_new,Dt,state)
@@ -71,10 +76,14 @@ for N in N_list:
                 # If the negativity is equal to zero, within the chosen tolerance, save the
                 # corresponding t value as t_ent time (entanglement surivival time)
                 if np.abs(np.real(neg)) < 1e-13:
-                    t_ent_Kraus.append(t)
+                    # print(f'Kraus neg = {neg}')
+                    # t_ent_Kraus.append(t)
                     dict_data['t_approx_Kraus'].append(t)
                     print(f'iter = {j}, t_ent_approx_Kraus = {t}')
-                t = t + Dt       
+                # else:
+                #     neg_old = neg
+                t = t + Dt
+            # print(f'Kraus neg old = {neg_old}')   
             t_fin_approx_Kraus = time.time()
             elapsed_time_approx_Kraus = elapsed_time_approx_Kraus + \
                                         (t_fin_approx_Kraus - t_in_approx_Kraus)
@@ -83,7 +92,7 @@ for N in N_list:
             if Standard == True:
                 # Define parameters for the standard case
                 alpha, gamma = 1, 1
-                t, t_max = 0, 10
+                t, t_max = 1.2, 10
         
                 # Compute the matrix associated to the Lindblad superoperator
                 Lind_matr = Lindbladian_matrix(N,RM_D,ham,alpha,gamma)
@@ -93,11 +102,15 @@ for N in N_list:
                 while (t < t_max):
                     n_ent = negat_ent(N,Lind_matr,t)
                     if np.abs(np.real(n_ent)) < 1e-13:
-                        t_ent_standard.append(t)
+                        # print(f'Stand neg = {n_ent}')
+                        # t_ent_standard.append(t)
                         dict_data['t_standard'].append(t)
                         print(f'iter = {j}, t_ent_standard = {t}')
                         break
+                    # else:
+                    #     neg_old = n_ent
                     t += Dt
+                # print(f'Standard neg old = {neg_old}')   
                 t_fin_standard = time.time()
                 elapsed_time_standard = elapsed_time_standard + (t_fin_standard - t_in_standard)
 
@@ -120,7 +133,7 @@ for N in N_list:
                     # If the negativity is equal to zero, within the chosen tolerance, save the
                     # corresponding t value as t_ent time (entanglement surivival time)
                     if np.abs(np.real(neg)) < 1e-13:
-                        t_ent_Umel.append(t)
+                        # t_ent_Umel.append(t)
                         dict_data['t_approx_Umel'].append(t)
                         print(f'iter = {j}, t_ent_approx_Umel = {t}')
                     t = t + Dt       
@@ -131,17 +144,17 @@ for N in N_list:
             ########################################################################################
 
         # Save the elapsed times for each iteration number at the corresponding dictionary keys
-        dict_time['elaps_approx_Kraus'].append(elapsed_time_approx_Kraus)
-        if Standard == True:
-            dict_time['elaps_stand'].append(elapsed_time_standard)
-        if Umel == True:
-            dict_time['elaps_approx_Umel'].append(elapsed_time_approx_Umel)
+        # dict_time['elaps_approx_Kraus'].append(elapsed_time_approx_Kraus)
+        # if Standard == True:
+        #     dict_time['elaps_stand'].append(elapsed_time_standard)
+        # if Umel == True:
+        #     dict_time['elaps_approx_Umel'].append(elapsed_time_approx_Umel)
 
         # Save the t_ent data in an Excel file.
         df_data = pd.concat([pd.Series(dict_data[key], name = f'{key}')\
                             for key in dict_data.keys()], axis = 1)
         dir = os.getcwd()
-        writer = pd.ExcelWriter(f'{dir}\\UMEL_data\\t_ent_N_{N}_{iterations}_iterations_Dt={Dt}_II.xlsx')
+        writer = pd.ExcelWriter(f'{dir}\\ALME_data\\t_ent_N_{N}_{iterations}_iterations_Dt={Dt}_II.xlsx')
         df_data.to_excel(writer, 'DataFrame')
         writer.close()
         print(f'DATA FILE CORRECTLY SAVED FOR {iterations} ITERATIONS - N = {N}')
@@ -149,15 +162,15 @@ for N in N_list:
         # Save the elapsed times for each iteration number at the corresponding dictionary keys.
         # This part is executed only when we are not interested in saving the elapsed time for each
         # dimension N. This because otherwise the file will be overwritten each time.
-        if save_time_N == False:
-            df_time_data = pd.concat([pd.Series(dict_time[key], name = f'{key}')\
-                                    for key in dict_time.keys()], axis = 1)
-            dir = os.getcwd()
-            writer_times = \
-                    pd.ExcelWriter(f'{dir}\\UMEL_data\\times_for_iters_t_ent_N_{N}_Dt={Dt}.xlsx')
-            df_time_data.to_excel(writer_times, 'DataFrame')
-            writer_times.close()
-            print(f'TIME FILE CORRECTLY SAVED')
+        # if save_time_N == False:
+        #     df_time_data = pd.concat([pd.Series(dict_time[key], name = f'{key}')\
+        #                             for key in dict_time.keys()], axis = 1)
+        #     dir = os.getcwd()
+        #     writer_times = \
+        #             pd.ExcelWriter(f'{dir}\\ALME_data\\times_for_iters_t_ent_N_{N}_Dt={Dt}.xlsx')
+        #     df_time_data.to_excel(writer_times, 'DataFrame')
+        #     writer_times.close()
+        #     print(f'TIME FILE CORRECTLY SAVED')
         
         # Save the elapsed times for each dimension N at the corresponding dictionary keys.
         # N.B. This part is here because we choose a fixed (small) iteration number when we are 
@@ -176,10 +189,12 @@ if save_time_N == True:
                            for key in dict_time_N.keys()], axis = 1)
     dir = os.getcwd()
     writer_times_N = \
-            pd.ExcelWriter(f'{dir}\\UMEL_data\\times_for_N_t_ent_iters={iterations}_Dt={Dt}_II.xlsx')
+            pd.ExcelWriter(f'{dir}\\ALME_data\\times_for_N_t_ent_iters={iterations}_Dt={Dt}_II.xlsx',\
+                           mode = 'a', if_sheet_exists = 'overlay')
     df_time_N.to_excel(writer_times_N, 'DataFrame')
     writer_times_N.close()
     print(f'TIME N FILE CORRECTLY SAVED')
-
+t_tot_fin = time.time() - t_tot_in
+print(t_tot_fin)
 
 
